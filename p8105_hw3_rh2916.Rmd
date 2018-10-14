@@ -117,6 +117,76 @@ mode <- function(x) {
 }
 ```
 
-### To that end, write a short description of the dataset, noting the size and structure of the data.
+### Write a short description of the dataset, noting the size and structure of the data.
 
 The size of the dataset is `r dim(instacart)`, containing `r nrow(instacart)` rows (observations) and `r ncol(instacart)` columns (variables), which are order_id, product_id, add_to_cart_order, reordered user_id eval_set order_number order_dow order_hour_of_day, days_since_prior_order, product_name, aisle_id, department_id, aisle and department. This dataset contains integer, character variable. There is information on users, orders, products, thus, the key variables are product_name(product_id), aisle(aisle_id) and department(department_id). From the key variables, we can tell the information about each order product. For instance, we can know that the most order is `r mode(Problem2_data$product_name)` for `r Problem2_data %>% filter(product_name == "Banana") %>% nrow()`, it is "fresh fruits" and is from department "produce".
+
+### How many aisles are there, and which aisles are the most items ordered from?
+
+```{r}
+Problem2_data %>%
+  distinct(aisle) %>% 
+  nrow()
+mode(Problem2_data$aisle)
+```
+From the result, we know that there are 134 aisles and 'fresh vegetables" is the most item ordered. 
+
+
+### Make a plot that shows the number of items ordered in each aisle. 
+
+```{r}
+Problem2_data %>%
+  mutate(aisle_id = as.character(aisle_id)) %>%
+  group_by(aisle_id) %>%
+  summarize(n_items = n_distinct(order_id)) %>%
+  mutate(
+    aisle_id = forcats::fct_reorder(aisle_id, n_items))%>% 
+  ggplot(aes(x = aisle_id, y = n_items)) + 
+  geom_point() +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(
+    title = "Number of items ordered in each aisle",
+    x = "Aisle",
+    y = "Number of items"
+  ) 
+```
+
+From the plot, we can find that aisle "Banana"(id 24) has the maximum number of order for over 70000 items. The majority of aisles have order number under 2000. This plot is ranked by number of items.
+
+### Make a table showing the most popular item aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”
+
+```{r}
+knitr::kable(
+  Problem2_data %>%
+  filter(aisle == 'baking ingredients'|aisle== 'dog food care'|aisle=='packaged vegetables fruits') %>%
+  group_by(aisle,product_name) %>%
+  summarize(n_product = n()) %>% 
+    group_by(aisle) %>% 
+    filter(n_product==max(n_product))
+)
+```
+
+The most popular item aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits” are "Light Brown Sugar ", "Snack Sticks Chicken & Rice Recipe Dog Treats" and "Organic Baby Spinach".
+
+
+### Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table)
+
+```{r}
+knitr::kable(
+  Problem2_data %>%
+  filter(product_name == "Pink Lady Apples"|product_name=="Coffee Ice Cream") %>%
+  group_by(product_name, order_dow) %>%
+  summarize(mean_order_hour = mean(order_hour_of_day)) %>%
+  spread(key = order_dow, value = mean_order_hour) %>%
+  rename( "Sunday" = "0",
+          "Monday" = "1",
+          "Tuesday" = "2",
+          "Wednesday" ="3",
+          "Thursday" = "4",
+          "Friday" = "5",
+          "Saturday" = "6")
+)
+```
+
+From the table we can find that for "Coffee Ice Cream", the most order time is Tuesday and the least is in Friday. For "Pink Lady Apples", the most order time is Wednesday and the least is Monday.
