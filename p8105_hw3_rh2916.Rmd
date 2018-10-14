@@ -219,3 +219,64 @@ Problem3_data =
 ```
 
 Change units for maximum and minimum temperature from tenth of degree C to degree C and precipitation, from tenth of mm to mm.
+
+### For snowfall, what are the most commonly observed values? Why?
+
+
+```{r}
+mode(Problem3_data$snow)
+```
+
+`r mode(Problem3_data$snow)` is the most commonly observed value. That is because for the majority of time, there is no snow in New York.
+
+
+### Make a two-panel plot showing the average temperature in January and in July in each station across years. 
+
+```{r}
+Problem3_data %>%
+  filter((month == "01" | month == "07") & !is.na(tmax)) %>%
+  group_by(month, year, id) %>%
+  summarize(mean_temp = mean(tmax)) %>% 
+  ggplot(aes(x = year, y = mean_temp)) +
+  geom_boxplot() +
+  facet_grid(.~month) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(
+    title = "Average maximum temperature in January and in July in each station across years",
+    x = "Year",
+    y = "Average temperature"
+  )
+```
+
+From the plot we can find that July has highermaximum temperature than January. There are outliers and it show that there are some abnormally high temperature at January and abnormally low temperature at July.
+
+
+### Make a two-panel plot showing (i) tmax vs tmin for the full dataset (ii) the distribution of snowfall values greater than 0 and less than 100 separately by year.
+
+```{r}
+plot1 = 
+  Problem3_data %>%
+  filter(!is.na(tmax) & !is.na(tmin)) %>%
+  ggplot(aes(x = tmax, y = tmin)) + 
+  geom_hex() +
+  labs(
+    title = "tmax vs tmin for the full dataset", 
+    x = "tmax",
+    y = "tmin" ) +
+  theme(legend.position = "bottom", legend.key.width = unit(1.2, "cm"))
+
+plot2 = 
+  Problem3_data %>%
+  filter(snow > 0 & snow < 100) %>%
+  ggplot(aes(x = snow, color = year)) + 
+  geom_density(alpha = .4, adjust = .5) +
+  labs(
+    title = "The distribution of snowfall values", 
+    x = "Snowfall values",
+    y = "Density" ) +
+  theme(legend.position = "bottom", legend.key.width = unit(0.2, "cm"))
+  
+plot1 + plot2
+```
+
+For 0-100 snowfall, the most snowfall appears is 25 mm while the least is 100 mm. The trend is decreasing from 0 to 100 although there are fluctuations. In 0-15 mm, there are significant differences between years. 
