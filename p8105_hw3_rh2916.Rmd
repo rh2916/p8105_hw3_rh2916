@@ -16,3 +16,19 @@ library(patchwork)
 library(lubridate)
 library(hexbin)
 ```
+
+## Problem 1
+```{r}
+library(p8105.datasets)
+data(brfss_smart2010)
+```
+
+```{r}
+problem1_data =
+  brfss_smart2010 %>%
+  janitor::clean_names() %>%
+  filter(topic == "Overall Health" ) %>%
+  mutate(response = as.factor(response)) %>%
+  select(-class, -topic, -question, -sample_size, -(confidence_limit_low : geo_location))
+```
+
